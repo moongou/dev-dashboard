@@ -48,64 +48,241 @@ _procs: dict = {}
 #   has_git  - Optional: True to show update button
 
 PROJECTS = [
-    # ── Example: Python FastAPI service ──────────────────────────────────────
+    # ── DeerFlow ──────────────────────────────────────────────────────────────
     {
-        "id": "example-api",
-        "name": "Example API",
-        "desc": "Sample FastAPI backend service",
+        "id": "deer-flow-frontend",
+        "name": "DeerFlow Frontend",
+        "desc": "DeerFlow AI Research Agent — nginx frontend",
         "intro": (
-            "A sample FastAPI service to demonstrate how to register services "
-            "in the Dev Dashboard. Replace this with your own services."
+            "Nginx reverse proxy serving the DeerFlow web UI. "
+            "Part of the DeerFlow AI research agent project. "
+            "Start the backend first before starting this service."
         ),
-        "port": 8000,
-        "group": "Python",
-        "dir": str(HOME / "projects/example-api"),
-        "cmd": ["python", "-m", "uvicorn", "main:app", "--port", "8000"],
+        "port": 2026,
+        "group": "AI",
+        "dir": str(HOME / "VS-CODE-PROJECT/deer-flow"),
+        "cmd": [
+            "bash", "-c",
+            "nginx -g 'daemon off;' "
+            "-c '/Users/m3max/VS-CODE-PROJECT/deer-flow/docker/nginx/nginx.local.conf' "
+            "-p '/Users/m3max/VS-CODE-PROJECT/deer-flow' "
+            "> logs/nginx.log 2>&1",
+        ],
+        "has_git": True,
+        "update_cmd": ["git", "pull"],
     },
-    # ── Example: Node.js frontend ────────────────────────────────────────────
     {
-        "id": "example-frontend",
-        "name": "Example Frontend",
-        "desc": "Sample React/Next.js frontend",
+        "id": "deer-flow-backend",
+        "name": "DeerFlow Backend",
+        "desc": "DeerFlow LangGraph dev server (port 2024)",
         "intro": (
-            "A sample Node.js frontend project. Shows how to register "
-            "npm-based services with custom environment variables."
+            "LangGraph development server powering the DeerFlow AI research agent. "
+            "Provides the graph execution API consumed by the frontend. "
+            "Requires Python virtualenv in the backend/ directory."
         ),
-        "port": 3000,
-        "group": "Node",
-        "dir": str(HOME / "projects/example-frontend"),
-        "cmd": ["npm", "run", "dev"],
-        "env": {"PORT": "3000"},
-        "update_cmd": ["bash", "-c", "git pull && npm install"],
+        "port": 2024,
+        "group": "AI",
+        "dir": str(HOME / "VS-CODE-PROJECT/deer-flow/backend"),
+        "cmd": [
+            ".venv/bin/python", "-m", "langgraph",
+            "dev", "--no-browser", "--port", "2024", "--n-jobs-per-worker", "1",
+        ],
+        "url_path": "/",
+        "has_git": True,
+        "update_cmd": ["bash", "-c", "git pull && .venv/bin/pip install -r requirements.txt"],
     },
-    # ── Example: Docker service ──────────────────────────────────────────────
+    # ── AI / Speech / Vision ──────────────────────────────────────────────────
     {
-        "id": "example-db",
-        "name": "Example Database",
-        "desc": "PostgreSQL via Docker",
+        "id": "cosyvoice",
+        "name": "CosyVoice",
+        "desc": "CosyVoice2 TTS FastAPI server (port 50000)",
         "intro": (
-            "A sample Docker-based service. Uses docker-compose for lifecycle management."
+            "CosyVoice2 — multilingual text-to-speech model serving a FastAPI endpoint. "
+            "Model: CosyVoice2-0.5B. Supports zero-shot cloning, cross-lingual synthesis, "
+            "and instruction-following voice generation."
         ),
-        "port": 5432,
-        "group": "Docker",
-        "dir": str(HOME / "projects/example-db"),
-        "cmd": ["docker-compose", "up", "-d"],
-        "stop_cmd": ["docker-compose", "down"],
+        "port": 50000,
+        "group": "AI",
+        "dir": str(HOME / "IdeaProjects/CosyVoice"),
+        "cmd": [
+            "bash", "-c",
+            "/Users/m3max/miniconda3/envs/cosyvoice/bin/python "
+            "runtime/python/fastapi/server.py --port 50000 "
+            "--model_dir /Users/m3max/IdeaProjects/CosyVoice/pretrained_models/CosyVoice2-0.5B",
+        ],
+        "has_git": True,
+        "update_cmd": ["git", "pull"],
+    },
+    {
+        "id": "voxcpm",
+        "name": "VoxCPM",
+        "desc": "VoxCPM2 Tokenizer-Free TTS (port 8808)",
+        "intro": (
+            "VoxCPM2 — a tokenizer-free text-to-speech model for multilingual speech generation, "
+            "creative voice design, and true-to-life voice cloning. "
+            "Runs a Gradio web UI on port 8808."
+        ),
+        "port": 8808,
+        "group": "AI",
+        "dir": str(HOME / "IdeaProjects/VoxCPM"),
+        "cmd": [".venv/bin/python", "app.py", "--port", "8808"],
+        "has_git": True,
+        "update_cmd": ["bash", "-c", "git pull && .venv/bin/pip install -r requirements.txt"],
+    },
+    {
+        "id": "openai-edge-tts",
+        "name": "OpenAI Edge TTS",
+        "desc": "OpenAI-compatible TTS API via Microsoft Edge (port 5051)",
+        "intro": (
+            "Drop-in OpenAI TTS API replacement powered by Microsoft Edge TTS. "
+            "Exposes POST /v1/audio/speech compatible with the OpenAI SDK. "
+            "Lightweight, no GPU required."
+        ),
+        "port": 5051,
+        "group": "AI",
+        "dir": str(HOME / "IdeaProjects/openai-edge-tts"),
+        "cmd": ["python", "app/server.py"],
+        "has_git": True,
+        "update_cmd": ["git", "pull"],
+    },
+    {
+        "id": "funasr",
+        "name": "FunASR",
+        "desc": "FunASR HTTP ASR server (port 10096, localhost only)",
+        "intro": (
+            "FunASR — a fundamental end-to-end speech recognition toolkit from Alibaba DAMO. "
+            "Serves a REST HTTP API on localhost:10096 for speech-to-text inference. "
+            "Supports multiple ASR models including paraformer and sensevoice."
+        ),
+        "port": 10096,
+        "group": "AI",
+        "dir": str(HOME / "IdeaProjects/FunASR"),
+        "cmd": [
+            "python", "runtime/python/http/server.py",
+            "--port", "10096", "--host", "127.0.0.1",
+        ],
+        "no_ui": True,
+        "has_git": True,
+        "update_cmd": ["git", "pull"],
+    },
+    {
+        "id": "mflux",
+        "name": "mflux",
+        "desc": "mflux MLX image generation server (port 8321)",
+        "intro": (
+            "mflux — a MLX-based image generation library running FLUX models "
+            "natively on Apple Silicon. Provides a web server for text-to-image generation. "
+            "Optimised for M-series Macs using the MLX framework."
+        ),
+        "port": 8321,
+        "group": "AI",
+        "dir": str(HOME / "IdeaProjects/mflux"),
+        "cmd": [".venv/bin/python", "server.py"],
+        "has_git": True,
+        "update_cmd": ["bash", "-c", "git pull && .venv/bin/pip install -e ."],
+    },
+    # ── MinerU ────────────────────────────────────────────────────────────────
+    {
+        "id": "mineru-gradio",
+        "name": "MinerU Gradio",
+        "desc": "MinerU PDF/document parser — Gradio UI (port 10002)",
+        "intro": (
+            "MinerU — a high-quality PDF and document parsing tool. "
+            "This instance exposes a Gradio web UI for interactive document conversion "
+            "including PDF → Markdown with layout analysis and formula recognition."
+        ),
+        "port": 10002,
+        "group": "AI",
+        "dir": str(HOME / "docker-data/mineru-venv"),
+        "cmd": [
+            "bash", "-c",
+            "/Users/m3max/docker-data/mineru-venv/bin/mineru-gradio "
+            "--server-name 0.0.0.0 --server-port 10002",
+        ],
+    },
+    {
+        "id": "mineru-api",
+        "name": "MinerU API",
+        "desc": "MinerU FastAPI document parsing API (port 49680, localhost only)",
+        "intro": (
+            "MinerU FastAPI server — provides a programmatic REST API for document parsing. "
+            "Listens on localhost:49680. Useful for integrations that need to convert "
+            "PDFs and office documents to structured Markdown or JSON."
+        ),
+        "port": 49680,
+        "group": "AI",
+        "dir": str(HOME / "docker-data/mineru-venv"),
+        "cmd": [
+            "bash", "-c",
+            "/Users/m3max/docker-data/mineru-venv/bin/python "
+            "-m mineru.cli.fast_api --host 127.0.0.1",
+        ],
         "no_ui": True,
     },
-    # ── Example: AI model service ────────────────────────────────────────────
+    # ── Python Services ───────────────────────────────────────────────────────
     {
-        "id": "example-llm",
-        "name": "Example LLM",
-        "desc": "Local LLM inference service",
+        "id": "ai-router",
+        "name": "AI Router",
+        "desc": "Local AI gateway / LLM router (port 9000)",
         "intro": (
-            "A sample AI model service. Demonstrates how to register "
-            "ML/AI services running on local hardware."
+            "AI Router — a local API gateway that routes requests to different AI backends "
+            "(Ark/Volcengine, OpenAI, Whisper, etc.). "
+            "Runs on localhost:9000. Managed via launchd for auto-start on login."
         ),
-        "port": 11434,
-        "group": "AI",
-        "dir": str(HOME),
-        "cmd": ["ollama", "serve"],
+        "port": 9000,
+        "group": "Python",
+        "dir": str(HOME / "IdeaProjects/ai-router"),
+        "cmd": ["python", "app.py"],
+        "has_git": True,
+        "update_cmd": ["bash", "-c", "git pull && pip install -r requirements.txt"],
+    },
+    {
+        "id": "roundtable-backend",
+        "name": "RoundTable Backend",
+        "desc": "RoundTable multi-agent discussion backend (port 8001)",
+        "intro": (
+            "RoundTable — a multi-agent AI discussion framework backend. "
+            "Exposes a FastAPI service on port 8001 that orchestrates multiple AI agents "
+            "in structured discussion rounds."
+        ),
+        "port": 8001,
+        "group": "Python",
+        "dir": str(HOME / "IdeaProjects/RoundTable/backend"),
+        "cmd": ["python", "-m", "app.main"],
+        "has_git": True,
+        "update_cmd": ["git", "pull"],
+    },
+    {
+        "id": "system-prompts",
+        "name": "System Prompts & Models",
+        "desc": "AI system prompts & model config server (port 10001)",
+        "intro": (
+            "A local server for managing and serving AI system prompts and model configurations. "
+            "Provides a simple API to retrieve prompts for different AI tools and workflows. "
+            "Runs on port 10001."
+        ),
+        "port": 10001,
+        "group": "Tools",
+        "dir": str(HOME / "docker-data/system-prompts-and-models-of-ai-tools"),
+        "cmd": ["python", "server.py"],
+        "has_git": True,
+        "update_cmd": ["git", "pull"],
+    },
+    # ── Node ──────────────────────────────────────────────────────────────────
+    {
+        "id": "dev-dashboard-node",
+        "name": "Dev Dashboard (Node)",
+        "desc": "Node/webpack dev-dashboard frontend (port 9999)",
+        "intro": (
+            "The webpack-based Node.js dev server for the IdeaProjects/dev-dashboard project. "
+            "Serves the frontend with hot-module replacement on port 9999."
+        ),
+        "port": 9999,
+        "group": "Node",
+        "dir": str(HOME / "IdeaProjects/dev-dashboard"),
+        "cmd": ["npm", "run", "dev"],
+        "update_cmd": ["bash", "-c", "git pull && npm install"],
+        "has_git": True,
     },
 ]
 
@@ -751,5 +928,5 @@ document.addEventListener('keydown', e => {
 </html>"""
 
 if __name__ == "__main__":
-    print("Dev Dashboard -> http://localhost:9999")
-    uvicorn.run(app, host="127.0.0.1", port=9999, log_level="warning")
+    print("Dev Dashboard -> http://localhost:8888")
+    uvicorn.run(app, host="127.0.0.1", port=8888, log_level="warning")
