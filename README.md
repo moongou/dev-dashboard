@@ -9,10 +9,13 @@ A lightweight local development service manager with a dark-themed web UI. Start
 ## Features
 
 - **Service Management** — Start/stop local services with one click
+- **Tag Management** — Create Chinese tags in Settings and assign multiple tags to each service
+- **Multi-Dimensional Filtering** — Filter by tag, running state, search keywords, and legacy group categories
 - **Real-time Logs** — SSE-based live log streaming with color-coded output
 - **Health Checks** — Automatic port detection and HTTP readiness probes (IPv4 + IPv6)
 - **Git Integration** — Pull updates for git-backed services directly from the UI
-- **Group Organization** — Services organized by category (Python, Node, AI, Docker, etc.)
+- **Top Filter Deck** — Use the top filter area for search, tag filtering, and legacy group filtering, with state controls pinned in the header bar
+- **Group Compatibility** — Keep the original category grouping (Python, Node, AI, Docker, etc.) as a secondary filter
 - **Dark UI** — Clean, responsive dark theme built with Tailwind CSS
 - **Zero Config Frontend** — Single-file HTML embedded in the Python backend
 
@@ -52,10 +55,18 @@ Edit the `PROJECTS` list in `server.py`:
 }
 ```
 
+## Tags And Settings
+
+- Open **Settings** in the dashboard to create and manage tags.
+- Tags are stored in `~/.config/dev-dashboard/settings.json`.
+- Each service can have multiple tags, and the top filter deck supports multi-tag intersection filtering.
+- Built-in suggested tags are provided in Chinese, grouped by themes such as speech, agents, document/vision, and engineering.
+- Running state filters (`全部`, `运行中`, `已停止`) are available directly in the top header bar.
+
 ## API
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
+| ------ | -------- | ----------- |
 | GET | `/api/projects` | List all projects with status |
 | GET | `/api/projects/{id}/ping` | Health check a service |
 | POST | `/api/projects/{id}/start` | Start a service |
