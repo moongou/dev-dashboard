@@ -3187,13 +3187,17 @@ HTML = r"""<!DOCTYPE html>
     position: relative;
     z-index: 1;
     min-width: 0;
+  .search-inline-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
   }
 
-  .rail-tags-block .section-row {
-    margin-bottom: 12px;
-  }
-
-  .tag-cloud-inline {
+  .rail-search-block .field-label {
+    margin-bottom: 0;
+    font-size: 12px;
+    white-space: nowrap;
     gap: 7px;
   }
 
@@ -3549,46 +3553,6 @@ HTML = r"""<!DOCTYPE html>
     text-align: center;
   }
 
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .summary-cell {
-    padding: 12px;
-    border-radius: 16px;
-    background: rgba(4, 9, 16, 0.38);
-    border: 1px solid rgba(148, 163, 184, 0.1);
-  }
-
-  .summary-strip {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .summary-mini {
-    padding: 10px 12px;
-    border-radius: 14px;
-    background: rgba(4, 9, 16, 0.38);
-    border: 1px solid rgba(148, 163, 184, 0.1);
-  }
-
-  .summary-mini strong {
-    display: block;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: -0.04em;
-  }
-
-  .summary-mini span {
-    display: block;
-    margin-top: 4px;
-    font-size: 11px;
-    color: var(--muted);
-  }
-
   .rail-details {
     margin-top: 10px;
     border-radius: 18px;
@@ -3624,48 +3588,6 @@ HTML = r"""<!DOCTYPE html>
 
   .rail-compact {
     padding: 12px;
-  }
-
-  .stage-header {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 2px 2px 14px;
-    margin-bottom: 10px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-  }
-
-  .stage-kicker {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: #67d2ff;
-  }
-
-  .stage-title {
-    margin: 4px 0 0;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-  }
-
-  .stage-summary {
-    margin: 4px 0 0;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.5;
-  }
-
-  .stage-header-tip {
-    margin: 0;
-    font-size: 12px;
-    color: #8ba4bf;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(148, 163, 184, 0.14);
-    background: rgba(9, 16, 28, 0.56);
   }
 
   .summary-label {
@@ -4153,10 +4075,6 @@ HTML = r"""<!DOCTYPE html>
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 
-  body.compact-mode .stage-header-tip {
-    display: none;
-  }
-
   body.compact-mode .card {
     padding: 10px 12px;
   }
@@ -4522,10 +4440,6 @@ HTML = r"""<!DOCTYPE html>
       min-height: 0;
     }
 
-    .stage-header {
-      align-items: flex-start;
-    }
-
     .status-grid {
       grid-template-columns: 1fr;
     }
@@ -4599,38 +4513,23 @@ HTML = r"""<!DOCTYPE html>
     <section class="rail">
       <div class="filter-toolbar">
         <section class="rail-block primary rail-search-block">
-          <div class="section-kicker">Query</div>
-          <label class="field-label" for="search-input">搜索服务</label>
-          <input id="search-input" class="field-input" type="text" placeholder="名称 / 描述 / 标签 / 分组" oninput="setSearchQuery(this.value)">
+          <div class="search-inline-row">
+            <label class="field-label" for="search-input">搜索服务</label>
+            <input id="search-input" class="field-input" type="text" placeholder="名称 / 描述 / 标签 / 分组" oninput="setSearchQuery(this.value)">
+          </div>
         </section>
 
         <section class="rail-block rail-tags-block">
-          <div class="section-row">
-            <span>标签筛选</span>
-            <button class="mini-link" type="button" onclick="openSettings()">管理</button>
-          </div>
           <div id="tag-filters" class="tag-cloud tag-cloud-inline"></div>
         </section>
 
         <section class="rail-block rail-group-block">
-          <div class="section-row">
-            <span>兼容分组</span>
-            <span class="section-meta">legacy</span>
-          </div>
           <div id="group-filters" class="rail-inline-filters"></div>
         </section>
       </div>
     </section>
 
     <section class="stage">
-      <div class="stage-header">
-        <div>
-          <div class="stage-kicker">Service Board</div>
-          <h2 class="stage-title">服务面板</h2>
-          <p id="stage-summary" class="stage-summary">正在整理视图…</p>
-        </div>
-        <p class="stage-header-tip">卡片右上角图标为快捷入口，悬停可看提示，点击信息图标展开详情。</p>
-      </div>
       <div id="active-filters" class="active-filters empty"></div>
       <div id="groups"></div>
     </section>
@@ -5079,10 +4978,6 @@ function syncSettingsInputs() {
 function renderSidebar() {
   syncSearchInput();
 
-  const totalRunning = projects.filter(project => project.running).length;
-  const taggedProjects = countTaggedProjects();
-  const totalTags = getKnownTags(settingsState).length;
-
   const statusHost = document.getElementById('status-filters');
   if (statusHost) {
     statusHost.innerHTML = STATUS_OPTIONS.map(option => (
@@ -5122,28 +5017,6 @@ function renderSidebar() {
           onclick: `toggleTagFilter('${escapeJsString(tag)}')`,
         })).join('')
       : '<span class="empty-mini">还没有标签。到设置里创建后，这里会自动出现。</span>';
-  }
-
-  const coverageHost = document.getElementById('coverage-stats');
-  if (coverageHost) {
-    coverageHost.innerHTML = `
-      <div class="summary-mini">
-        <strong>${taggedProjects}</strong>
-        <span class="summary-label">已标记项目</span>
-      </div>
-      <div class="summary-mini">
-        <strong>${projects.length - taggedProjects}</strong>
-        <span class="summary-label">未标记项目</span>
-      </div>
-      <div class="summary-mini">
-        <strong>${totalTags}</strong>
-        <span class="summary-label">可用标签</span>
-      </div>
-      <div class="summary-mini">
-        <strong>${totalRunning}</strong>
-        <span class="summary-label">当前运行中</span>
-      </div>
-    `;
   }
 }
 
@@ -5296,19 +5169,6 @@ function render() {
   expandedCards = new Set([...expandedCards].filter(id => validIds.has(id)));
 
   const filteredProjects = orderedProjects(getFilteredProjects());
-  const runningInView = filteredProjects.filter(project => project.running).length;
-  const stageSummaryParts = [
-    `当前显示 ${filteredProjects.length} / ${projects.length} 个服务`,
-    `视图内运行 ${runningInView}`,
-  ];
-  if (searchQuery.trim()) stageSummaryParts.push(`检索“${searchQuery.trim()}”`);
-  if (selectedStatus !== 'all') stageSummaryParts.push(`状态 ${STATUS_LABELS[selectedStatus]}`);
-  if (selectedGroup !== 'All') stageSummaryParts.push(`分组 ${selectedGroup}`);
-  if (activeTags.length) stageSummaryParts.push(`标签 ${activeTags.length}`);
-  if (compactMode) stageSummaryParts.push('紧凑模式');
-
-  const stageSummary = document.getElementById('stage-summary');
-  if (stageSummary) stageSummary.textContent = stageSummaryParts.join(' · ');
 
   document.getElementById('groups').innerHTML = filteredProjects.length
     ? `<div class="stage-grid">${filteredProjects.map(cardHTML).join('')}</div>`

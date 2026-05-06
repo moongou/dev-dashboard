@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-05-06
+## 0.2.0 - 2026-05-06
 
 ### Changed
 
@@ -9,4 +9,5 @@
 - Removed the homepage overview panel and removed explanatory helper copy from the tag filter area.
 - Put tag filtering and legacy group filtering on the same row with a 3:1 width split and expanded the tag display region to show roughly three lines.
 - Removed the global ASR hotkey shortcut from the dashboard header while keeping VibeVoice ASR controls on the service card level.
-- Updated the README to reflect the revised dashboard layout.
+
+- Removed the search kicker label, aligned the search field inline with the search title, and removed the service board title/summary block so services render immediately.
