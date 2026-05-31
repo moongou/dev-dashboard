@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.1 - 2026-06-01
+
+### Added in 0.2.1
+
+- Added migrated local service entries for the new workstation, including Customs Parameters, DayDayUp, DeepAnalyze, Guanyu, Huaxia Adventure, AuditMind, and Customs Admin Cases.
+
+### Changed in 0.2.1
+
+- Added default executable search paths for dashboard-managed services so Homebrew and system binaries resolve reliably after migration.
+- Updated old `/Users/m3max` service paths to `/Users/m4max` for the new machine.
+
+### Fixed in 0.2.1
+
+- Fixed the dashboard project list staying empty when the page initially loads while the browser tab is hidden.
+
 ## 0.2.0 - 2026-05-06
 
 ### Changed

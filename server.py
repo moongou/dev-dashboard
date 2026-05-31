@@ -40,6 +40,14 @@ ALLOWED_SETTINGS = (
   "MODAL_TOKEN_ID",
   "MODAL_TOKEN_SECRET",
 )
+DEFAULT_EXEC_PATHS = (
+  "/opt/homebrew/bin",
+  "/usr/local/bin",
+  "/usr/bin",
+  "/bin",
+  "/usr/sbin",
+  "/sbin",
+)
 VIBEVOICE_ASR_PROJECT_ID = "vibevoice-asr-m3"
 VIBEVOICE_ASR_HOTKEY_FILE = SETTINGS_DIR / "vibevoice_asr_hotkey.json"
 
@@ -72,6 +80,96 @@ _projects_executor = ThreadPoolExecutor(max_workers=8)
 #   required_settings - Optional: list of settings keys required before start
 
 PROJECTS = [
+  {
+    "id": "customs-params-frontend",
+    "name": "海关参数库 Frontend",
+    "desc": "Customs Parameters 参数管理界面 (port 5420)",
+    "intro": (
+      "React 18 + Vite + Tailwind 前端，提供 89 张海关业务参数表的浏览/检索/增删改，"
+      "以及『数据溯源与更新』页（来源登记、采集批次、更新时间、多源冲突）。"
+      "通过 /api 代理到 8420 后端。"
+    ),
+    "port": 5420,
+    "group": "AI",
+    "dir": str(HOME / "VS-CODE-PROJECT/Customs_Parameters/frontend"),
+    "cmd": ["/usr/local/bin/npm", "run", "dev", "--", "--port", "5420"],
+    "url_path": "/",
+    "has_git": False,
+    "tags": ["海关", "参数库", "前端", "溯源"],
+  },
+  {
+    "id": "customs-params-backend",
+    "name": "海关参数库 Backend",
+    "desc": "Customs Parameters FastAPI backend (port 8420)",
+    "intro": (
+      "FastAPI + SQLAlchemy + PostgreSQL(5433) 后端，提供通用参数表 CRUD、总览统计，"
+      "以及 /api/provenance 溯源接口（来源、批次、冲突、按表更新汇总、手动更新）。"
+    ),
+    "port": 8420,
+    "group": "AI",
+    "dir": str(HOME / "VS-CODE-PROJECT/Customs_Parameters/backend"),
+    "cmd": [".venv/bin/uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8420"],
+    "url_path": "/docs",
+    "has_git": False,
+    "tags": ["海关", "参数库", "后端", "接口服务"],
+  },
+  {
+    "id": "daydayup-frontend",
+    "name": "DayDayUp Frontend",
+    "desc": "天天向上 Vue 3 智能办公工作台 (port 5174)",
+    "intro": (
+      "Vue 3 + Tailwind CSS frontend for the DayDayUp intelligent office assistant. "
+      "It proxies /api requests to the FastAPI backend on port 8000."
+    ),
+    "port": 5174,
+    "group": "AI",
+    "dir": str(HOME / "VS-CODE-PROJECT/DayDayUp/frontend"),
+    "cmd": ["/usr/local/bin/npm", "run", "dev", "--", "--port", "5174"],
+    "url_path": "/",
+    "has_git": False,
+    "tags": ["智能办公", "前端", "网页界面"],
+  },
+  {
+    "id": "daydayup-backend",
+    "name": "DayDayUp Backend",
+    "desc": "天天向上 FastAPI backend (port 8000)",
+    "intro": (
+      "FastAPI service for DayDayUp. Provides streaming chat, model routing, "
+      "document parsing, semantic mapping, search integration, and task APIs."
+    ),
+    "port": 8000,
+    "group": "AI",
+    "dir": str(HOME / "VS-CODE-PROJECT/DayDayUp/backend"),
+    "cmd": [".venv/bin/uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"],
+    "url_path": "/docs",
+    "has_git": False,
+    "tags": ["智能办公", "后端", "接口服务"],
+  },
+  {
+    "id": "deepanalyze-docker",
+    "name": "DeepAnalyze Docker",
+    "desc": "DeepAnalyze demo/chat CPU container (frontend 18400)",
+    "intro": (
+      "Local Docker Desktop packaging for the real DeepAnalyze demo/chat stack. "
+      "Starts the backend API, workspace file server, and Next.js frontend together "
+      "from the locally built deepanalyze-local image. "
+      "Host ports: frontend 18400, backend 18200, file service 18100."
+    ),
+    "port": 18400,
+    "group": "Docker",
+    "dir": str(HOME / "IdeaProjects/DeepAnalyze"),
+    "cmd": [
+      "bash", "-lc",
+      "docker rm -f deepanalyze-local >/dev/null 2>&1 || true; exec docker run --name deepanalyze-local -p 18400:4000 -p 18200:8200 -p 18100:8100 deepanalyze-local:2.0.11"
+    ],
+    "stop_cmd": ["docker", "rm", "-f", "deepanalyze-local"],
+    "update_cmd": [
+      "bash", "-lc",
+      "cd /Users/m4max/IdeaProjects/DeepAnalyze && docker build --pull=false --build-arg BASE_IMAGE=mcr.microsoft.com/devcontainers/python:3.12-bookworm -f docker/Dockerfile.local -t deepanalyze-local:latest -t deepanalyze-local:2.0.11 ."
+    ],
+    "url_path": "/",
+    "has_git": True,
+  },
     # ── WiFi-DensePose ────────────────────────────────────────────────────────
     {
         "id": "wifi-densepose",
@@ -134,8 +232,8 @@ PROJECTS = [
         "cmd": [
             "bash", "-c",
             "nginx -g 'daemon off;' "
-            "-c '/Users/m3max/VS-CODE-PROJECT/deer-flow/docker/nginx/nginx.local.conf' "
-            "-p '/Users/m3max/VS-CODE-PROJECT/deer-flow' "
+            "-c '/Users/m4max/VS-CODE-PROJECT/deer-flow/docker/nginx/nginx.local.conf' "
+            "-p '/Users/m4max/VS-CODE-PROJECT/deer-flow' "
             "> logs/nginx.log 2>&1",
         ],
         "has_git": True,
@@ -292,9 +390,9 @@ PROJECTS = [
         "dir": str(HOME / "IdeaProjects/CosyVoice"),
         "cmd": [
             "bash", "-c",
-            "/Users/m3max/miniconda3/envs/cosyvoice/bin/python "
+            "/Users/m4max/miniconda3/envs/cosyvoice/bin/python "
             "runtime/python/fastapi/server.py --port 50000 "
-            "--model_dir /Users/m3max/IdeaProjects/CosyVoice/pretrained_models/CosyVoice2-0.5B",
+            "--model_dir /Users/m4max/IdeaProjects/CosyVoice/pretrained_models/CosyVoice2-0.5B",
         ],
         "has_git": True,
         "update_cmd": ["git", "pull"],
@@ -725,7 +823,7 @@ PROJECTS = [
         "dir": str(HOME / "docker-data/mineru-venv"),
         "cmd": [
             "bash", "-c",
-            "/Users/m3max/docker-data/mineru-venv/bin/mineru-gradio "
+            "/Users/m4max/docker-data/mineru-venv/bin/mineru-gradio "
             "--server-name 0.0.0.0 --server-port 10002",
         ],
     },
@@ -743,7 +841,7 @@ PROJECTS = [
         "dir": str(HOME / "docker-data/mineru-venv"),
         "cmd": [
             "bash", "-c",
-            "/Users/m3max/docker-data/mineru-venv/bin/python "
+            "/Users/m4max/docker-data/mineru-venv/bin/python "
             "-m mineru.cli.fast_api --host 127.0.0.1 --port 49680",
         ],
         "no_ui": True,
@@ -781,6 +879,29 @@ PROJECTS = [
         "has_git": True,
         "update_cmd": ["git", "pull"],
     },
+      {
+        "id": "guanyu-workbench",
+        "name": "观雨",
+        "desc": "观雨智能分析工作台 (port 4000)",
+        "intro": (
+          "观雨海关风险分析智能体工作台。"
+          "开发面板会以 CPU-only 非交互模式拉起本地前端工作台 http://localhost:4000，"
+          "并同时启动后端 API http://localhost:8200 与文件服务 http://localhost:8100，"
+          "方便在本机直接完成界面调试、流程验证与日常使用。"
+        ),
+        "port": 4000,
+        "group": "AI",
+        "dir": str(HOME / "IdeaProjects/DeepAnalyze"),
+        "cmd": [
+          "bash",
+          "-lc",
+          "./start.sh --backend cpu && for _ in $(seq 1 30); do lsof -tiTCP:4000 -sTCP:LISTEN >/dev/null 2>&1 && break; sleep 1; done && while lsof -tiTCP:4000 -sTCP:LISTEN >/dev/null 2>&1; do sleep 5; done",
+        ],
+        "stop_cmd": ["bash", "stop.sh"],
+        "url_path": "/",
+        "has_git": True,
+        "update_cmd": ["git", "pull", "--ff-only"],
+      },
       {
         "id": "osint-ai-framework-backend",
         "name": "OSINT AI Framework Backend",
@@ -1141,6 +1262,138 @@ PROJECTS = [
           "git pull && docker compose pull && docker compose up -d",
         ],
       },
+      {
+        "id": "huaxia-adventure",
+        "name": "山河之旅",
+        "desc": "中国地理文化探险游戏 MVP 原型",
+        "intro": (
+          "基于真实中国经纬度的旅行探险游戏。玩家在中国地图上探索城市、收集地标、"
+          "回答地理文化问题获取金币。支持多个角色皮肤、AI 出题、题库管理、赛季排行等功能。"
+          "使用 Vite + React + TypeScript 构建。"
+        ),
+        "port": 5173,
+        "group": "Node",
+        "dir": str(HOME / "4033-Travel in China"),
+        "cmd": [
+          "bash",
+          "-lc",
+          "/opt/homebrew/bin/npm run dev -- --host 0.0.0.0",
+        ],
+        "stop_cmd": [
+          "pkill",
+          "-f",
+          "vite.*--host",
+        ],
+        "url_path": "/",
+        "has_git": True,
+      },
+      {
+        "id": "auditmind",
+        "name": "AuditMind",
+        "desc": "智能审计工作台（FastAPI + React）",
+        "intro": (
+          "AuditMind 审计智能体原型，覆盖规定学习、违规清单、特征推理、"
+          "数据验证与报告输出。开发面板启动时会同时拉起后端 8030 和前端 5266。"
+        ),
+        "port": 5266,
+        "group": "AI",
+        "dir": str(HOME / "VS-CODE-PROJECT/AuditMind"),
+        "cmd": [
+          "bash",
+          "-lc",
+          "AUDITMIND_BACKEND_PORT=8030 AUDITMIND_FRONTEND_PORT=5266 PORT=5266 VITE_API_BASE_URL=http://127.0.0.1:8030/api scripts/dev-dashboard-start.sh",
+        ],
+        "stop_cmd": [
+          "bash",
+          "-lc",
+          "scripts/dev-dashboard-stop.sh",
+        ],
+        "url_path": "/",
+        "has_git": True,
+      },
+      {
+        "id": "customs-admin-cases",
+        "name": "Customs Admin Cases",
+        "desc": "海关行政处罚案件平台（FastAPI + /ui）",
+        "intro": (
+          "海关行政处罚案件采集与检索平台。"
+          "后端提供案件与报告 API，并在同端口挂载 /ui 下载态势仪表板。"
+          "面板启动时会使用 backend/.venv312 在 8012 端口拉起服务。"
+        ),
+        "port": 8012,
+        "group": "AI",
+        "dir": str(HOME / "VS-CODE-PROJECT/Customs-Admin-Cases/backend"),
+        "cmd": [
+          "bash",
+          "-lc",
+          "/Users/m4max/VS-CODE-PROJECT/Customs-Admin-Cases/backend/.venv312/bin/uvicorn app.main:app --host 127.0.0.1 --port 8012",
+        ],
+        "url_path": "/ui/",
+        "has_git": True,
+        "update_cmd": [
+          "bash",
+          "-lc",
+          "cd /Users/m4max/VS-CODE-PROJECT/Customs-Admin-Cases && git pull",
+        ],
+      },
+      {
+        "id": "openhuman-dev",
+        "name": "OpenHuman Dev",
+        "desc": "OpenHuman 本地开发实例（前端 18000，core 18001）",
+        "intro": (
+          "OpenHuman 本地源码开发服务。"
+          "面板启动时会先拉起 openhuman-core，再启动 Vite 前端，"
+          "并把前端固定到 18000、core 固定到 18001，便于统一从 dashboard 启停。"
+        ),
+        "port": 18000,
+        "group": "AI",
+        "dir": str(HOME / "VS-CODE-PROJECT/Openhuman"),
+        "cmd": [
+          "bash",
+          "-lc",
+          "bash ./scripts/dev-dashboard-start.sh",
+        ],
+        "env": {
+          "GGML_NATIVE": "OFF",
+          "OPENHUMAN_DEV_PORT": "18000",
+          "OPENHUMAN_CORE_PORT": "18001",
+          "OPENHUMAN_CORE_RPC_URL": "http://127.0.0.1:18001/rpc",
+          "VITE_OPENHUMAN_CORE_RPC_URL": "http://127.0.0.1:18001/rpc",
+        },
+        "url_path": "/",
+        "has_git": True,
+        "update_cmd": [
+          "bash",
+          "-lc",
+          "git pull --ff-only && git submodule update --init --recursive && pnpm install",
+        ],
+      },
+    # ── CodeGraph ─────────────────────────────────────────────────────────────
+    {
+        "id": "codegraph",
+        "name": "CodeGraph",
+        "desc": "语义代码智能引擎，为 Claude Code 提供代码知识图谱 (port 7474)",
+        "intro": (
+            "本地优先的代码智能系统，基于 tree-sitter 构建语义知识图谱，支持 19+ 种语言。"
+            "94% 更少工具调用 · 77% 更快探索 · 100% 本地运行。"
+            "提供 MCP 服务器接口供 Claude Code 使用，同时运行状态仪表板于 port 7474。"
+        ),
+        "port": 7474,
+        "group": "工具链",
+        "dir": str(HOME / "VS-CODE-PROJECT/Codegraph"),
+        "cmd": [
+            "/usr/local/bin/node",
+            str(HOME / "VS-CODE-PROJECT/Codegraph/devserver.js"),
+        ],
+        "env": {"PORT": "7474"},
+        "url_path": "/",
+        "has_git": True,
+        "update_cmd": [
+            "bash",
+            "-c",
+            "cd " + str(HOME / "VS-CODE-PROJECT/Codegraph") + " && git -c http.proxy='' -c https.proxy='' pull && npm install && npm run build",
+        ],
+    },
 ]
 
 BY_ID = {p["id"]: p for p in PROJECTS}
@@ -1161,8 +1414,8 @@ def port_pids(port: int, *, listeners_only: bool = False) -> list[int]:
   return [int(x) for x in r.stdout.split() if x.isdigit()]
 
 
-def clear_stale_port_processes(port: int) -> list[int]:
-  stale_pids = port_pids(port)
+def clear_stale_port_processes(port: int, *, listeners_only: bool = False) -> list[int]:
+  stale_pids = port_pids(port, listeners_only=listeners_only)
   if not stale_pids:
     return []
 
@@ -1174,7 +1427,7 @@ def clear_stale_port_processes(port: int) -> list[int]:
 
   deadline = time.monotonic() + 2.0
   while time.monotonic() < deadline:
-    remaining = port_pids(port)
+    remaining = port_pids(port, listeners_only=listeners_only)
     if not remaining:
       return []
     time.sleep(0.1)
@@ -1399,6 +1652,10 @@ def resolve_project_env(
   settings_state: dict[str, object] | None = None,
 ) -> dict[str, str]:
   resolved = dict(os.environ)
+  existing_path = resolved.get("PATH", "")
+  path_parts = [item for item in DEFAULT_EXEC_PATHS if item]
+  path_parts.extend(item for item in existing_path.split(os.pathsep) if item)
+  resolved["PATH"] = os.pathsep.join(dict.fromkeys(path_parts))
   settings = settings_state or load_settings_state()
   secrets = settings.get("secrets", {})
   if not isinstance(secrets, dict):
@@ -1835,35 +2092,38 @@ async def start_project(pid: str):
 
 @app.post("/api/projects/{pid}/stop")
 async def stop_project(pid: str):
-    proj = BY_ID.get(pid)
-    if not proj:
-        raise HTTPException(404, "Project not found")
+  proj = BY_ID.get(pid)
+  if not proj:
+    raise HTTPException(404, "Project not found")
 
-    # Custom stop command (e.g., docker-compose down)
-    if "stop_cmd" in proj:
-        subprocess.run(proj["stop_cmd"], cwd=proj["dir"], capture_output=True)
+  port = proj.get("port")
 
-    # Terminate the process group we started
-    proc = _procs.pop(pid, None)
-    if proc and proc.poll() is None:
-        try:
-            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-            proc.wait(timeout=5)
-        except Exception:
-            try:
-                proc.kill()
-            except Exception:
-                pass
+  # Custom stop command (e.g., docker-compose down)
+  if "stop_cmd" in proj:
+    subprocess.run(proj["stop_cmd"], cwd=proj["dir"], capture_output=True)
 
-    # Fallback: kill processes occupying the port
-    for p in port_pids(proj["port"]):
-        try:
-            os.kill(p, signal.SIGTERM)
-        except Exception:
-            pass
+  # Terminate the process group we started
+  proc = _procs.pop(pid, None)
+  if proc and proc.poll() is None:
+    try:
+      os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+      proc.wait(timeout=5)
+    except Exception:
+      try:
+        proc.kill()
+      except Exception:
+        pass
 
-    invalidate_projects_cache()
-    return {"ok": True}
+  # Fallback: ensure the advertised listener port is actually released.
+  if port is not None:
+    remaining = clear_stale_port_processes(port, listeners_only=True)
+    if remaining:
+      invalidate_projects_cache()
+      pids = ", ".join(str(process_id) for process_id in remaining)
+      return {"ok": False, "msg": f"Port {port} is still held by process(es): {pids}"}
+
+  invalidate_projects_cache()
+  return {"ok": True}
 
 
 @app.post("/api/projects/{pid}/update")
@@ -3119,7 +3379,8 @@ HTML = r"""<!DOCTYPE html>
   .rail,
   .stage,
   #modal,
-  #settings-modal {
+  #settings-modal,
+  #project-tag-modal {
     background: linear-gradient(180deg, var(--panel) 0%, var(--panel-strong) 100%);
     border: 1px solid var(--line);
     box-shadow: var(--shadow);
@@ -3151,13 +3412,30 @@ HTML = r"""<!DOCTYPE html>
     padding: 10px 12px;
   }
 
-  .rail-search-block .section-kicker {
-    margin-bottom: 6px;
+  .search-inline-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+  }
+
+  .search-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+  }
+
+  .search-sort-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   .rail-search-block .field-label {
-    margin-bottom: 6px;
+    margin-bottom: 0;
     font-size: 12px;
+    white-space: nowrap;
   }
 
   .rail-search-block .field-input {
@@ -3187,18 +3465,6 @@ HTML = r"""<!DOCTYPE html>
     position: relative;
     z-index: 1;
     min-width: 0;
-  .search-inline-row {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 10px;
-  }
-
-  .rail-search-block .field-label {
-    margin-bottom: 0;
-    font-size: 12px;
-    white-space: nowrap;
-    gap: 7px;
   }
 
   .rail-tags-block .tag-cloud-inline {
@@ -3216,16 +3482,16 @@ HTML = r"""<!DOCTYPE html>
   }
 
   .rail-tags-block .tag-pill {
-    min-height: 28px;
-    padding: 5px 9px;
-    font-size: 11px;
-    gap: 6px;
+    min-height: 24px;
+    padding: 3px 8px;
+    font-size: 10px;
+    gap: 5px;
   }
 
   .rail-tags-block .pill-count {
-    min-width: 16px;
-    padding: 1px 5px;
-    font-size: 9px;
+    min-width: 14px;
+    padding: 0 4px;
+    font-size: 8px;
   }
 
   .rail::before,
@@ -3321,6 +3587,11 @@ HTML = r"""<!DOCTYPE html>
     color: #cfe0f4;
   }
 
+  .field-label.inline {
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+
   .field-help {
     margin: 6px 0 0;
     font-size: 11px;
@@ -3350,6 +3621,10 @@ HTML = r"""<!DOCTYPE html>
 
   .field-input.narrow {
     max-width: 240px;
+  }
+
+  .search-sort-row .field-input {
+    min-width: 168px;
   }
 
   .rail-stack,
@@ -4077,6 +4352,7 @@ HTML = r"""<!DOCTYPE html>
 
   body.compact-mode .card {
     padding: 10px 12px;
+    cursor: pointer;
   }
 
   body.compact-mode .card-header {
@@ -4121,8 +4397,6 @@ HTML = r"""<!DOCTYPE html>
     transition: opacity 0.18s ease, max-height 0.18s ease, margin-top 0.18s ease;
   }
 
-  body.compact-mode .card:hover .card-icon-row,
-  body.compact-mode .card:focus-within .card-icon-row,
   body.compact-mode .card.expanded .card-icon-row {
     opacity: 1;
     max-height: 56px;
@@ -4133,6 +4407,11 @@ HTML = r"""<!DOCTYPE html>
   body.compact-mode .card.expanded .card-detail {
     margin-top: 8px;
     padding-top: 8px;
+  }
+
+  body.compact-mode .card button,
+  body.compact-mode .card a {
+    cursor: pointer;
   }
 
   .empty-state {
@@ -4160,7 +4439,8 @@ HTML = r"""<!DOCTYPE html>
   }
 
   #modal-overlay,
-  #settings-overlay {
+  #settings-overlay,
+  #project-tag-overlay {
     display: none;
     position: fixed;
     inset: 0;
@@ -4173,10 +4453,12 @@ HTML = r"""<!DOCTYPE html>
   }
 
   #modal-overlay.open,
-  #settings-overlay.open { display: flex; }
+  #settings-overlay.open,
+  #project-tag-overlay.open { display: flex; }
 
   #modal,
-  #settings-modal {
+  #settings-modal,
+  #project-tag-modal {
     position: relative;
     width: min(920px, 100%);
     max-height: min(88vh, 920px);
@@ -4186,6 +4468,12 @@ HTML = r"""<!DOCTYPE html>
 
   #settings-modal {
     width: min(1180px, 100%);
+    display: flex;
+    flex-direction: column;
+  }
+
+  #project-tag-modal {
+    width: min(760px, 100%);
     display: flex;
     flex-direction: column;
   }
@@ -4377,6 +4665,44 @@ HTML = r"""<!DOCTYPE html>
     flex-wrap: wrap;
   }
 
+  .card-tag-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .card-tag-edit-btn {
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 11px;
+  }
+
+  .project-tag-editor-body {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 18px 22px 22px;
+  }
+
+  .project-tag-editor-summary {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .project-tag-editor-tags {
+    min-height: 56px;
+    align-content: flex-start;
+  }
+
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.58); border-radius: 999px; }
@@ -4395,6 +4721,21 @@ HTML = r"""<!DOCTYPE html>
     .settings-project-row {
       flex-direction: column;
       align-items: flex-start;
+    }
+
+    .search-controls {
+      grid-template-columns: 1fr;
+    }
+
+    .search-sort-row,
+    .project-tag-editor-summary {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .search-sort-row .field-input {
+      width: 100%;
+      max-width: none;
     }
 
     .topbar-inner {
@@ -4460,13 +4801,20 @@ HTML = r"""<!DOCTYPE html>
     }
 
     body.compact-mode .card-main {
-      margin-top: 8px;
+      margin-top: 0;
     }
 
     body.compact-mode .card-icon-row {
+      opacity: 0;
+      max-height: 0;
+      margin-top: 0;
+      pointer-events: none;
+    }
+
+    body.compact-mode .card.expanded .card-icon-row {
       opacity: 1;
       max-height: 96px;
-      margin-top: 0;
+      margin-top: 8px;
       pointer-events: auto;
     }
 
@@ -4503,7 +4851,7 @@ HTML = r"""<!DOCTYPE html>
     <div class="topbar-actions">
       <button class="btn btn-settings" type="button" onclick="openSettings()">&#9881; 设置</button>
       <button class="btn btn-log" type="button" onclick="refreshAll()">&#8635; 刷新</button>
-      <button id="compact-toggle-btn" class="btn btn-log" type="button" onclick="toggleCompactMode()" title="开启超紧凑模式（每卡一行核心信息，悬停显示入口）" aria-pressed="false">&#128269; 紧凑</button>
+      <button id="compact-toggle-btn" class="btn btn-log" type="button" onclick="toggleCompactMode()" title="开启超紧凑模式（每卡一行核心信息，点击卡片展开详情）" aria-pressed="false">&#128269; 紧凑</button>
     </div>
   </div>
 </header>
@@ -4513,9 +4861,18 @@ HTML = r"""<!DOCTYPE html>
     <section class="rail">
       <div class="filter-toolbar">
         <section class="rail-block primary rail-search-block">
-          <div class="search-inline-row">
-            <label class="field-label" for="search-input">搜索服务</label>
-            <input id="search-input" class="field-input" type="text" placeholder="名称 / 描述 / 标签 / 分组" oninput="setSearchQuery(this.value)">
+          <div class="search-controls">
+            <div class="search-inline-row">
+              <label class="field-label" for="search-input">搜索服务</label>
+              <input id="search-input" class="field-input" type="text" placeholder="名称 / 描述 / 标签 / 分组" oninput="setSearchQuery(this.value)">
+            </div>
+            <div class="search-sort-row">
+              <label class="field-label inline" for="sort-select">排序</label>
+              <select id="sort-select" class="field-input narrow" onchange="setSortMode(this.value)">
+                <option value="default">默认分组</option>
+                <option value="name">名称 A-Z</option>
+              </select>
+            </div>
           </div>
         </section>
 
@@ -4624,6 +4981,48 @@ HTML = r"""<!DOCTYPE html>
   </div>
 </div>
 
+<div id="project-tag-overlay" onclick="closeProjectTagEditor(event)">
+  <div id="project-tag-modal">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-label">tags</span>
+        <span id="project-tag-title" class="modal-title"></span>
+      </div>
+      <button class="btn btn-stop" type="button" onclick="closeProjectTagEditor()">&#10005; 关闭</button>
+    </div>
+
+    <div class="project-tag-editor-body">
+      <div class="project-tag-editor-summary">
+        <div>
+          <div id="project-tag-subtitle" class="section-meta"></div>
+          <p class="field-help compact">点击标签即可多选；已选标签会高亮。也可以直接新增标签并立即绑定到当前项目。</p>
+        </div>
+        <span id="project-tag-count" class="hint-chip subtle">0 个标签</span>
+      </div>
+
+      <div class="field-row">
+        <label for="project-tag-new-input" class="field-label">新增标签</label>
+        <div class="tag-create-row">
+          <input id="project-tag-new-input" class="field-input" type="text" placeholder="例如：本地工具、实验性" onkeydown="handleProjectTagNewKeydown(event)">
+          <button class="btn btn-settings" type="button" onclick="addProjectTagFromInput()">添加并选中</button>
+        </div>
+      </div>
+
+      <div id="project-tag-editor-tags" class="settings-tag-cloud project-tag-editor-tags"></div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="settings-save-bar">
+        <span class="field-help">保存后会立即写入 ~/.config/dev-dashboard/settings.json</span>
+        <div class="modal-actions">
+          <button class="btn btn-log" type="button" onclick="closeProjectTagEditor()">取消</button>
+          <button id="save-project-tag-btn" class="btn btn-start" type="button" onclick="saveProjectTagEditor()">保存标签</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 let projects = [];
 let autoScroll = true;
@@ -4636,12 +5035,21 @@ let selectedGroup = 'All';
 let activeTags = [];
 let expandedCards = new Set();
 const COMPACT_MODE_STORAGE_KEY = 'dev-dashboard-compact-mode';
+const SORT_MODE_STORAGE_KEY = 'dev-dashboard-sort-mode';
 let compactMode = true;
+let sortMode = 'default';
+let projectTagEditor = null;
 try {
   const storedCompactMode = localStorage.getItem(COMPACT_MODE_STORAGE_KEY);
   compactMode = storedCompactMode === null ? true : storedCompactMode === '1';
 } catch (_) {
   compactMode = true;
+}
+try {
+  const storedSortMode = localStorage.getItem(SORT_MODE_STORAGE_KEY);
+  sortMode = storedSortMode === 'name' ? 'name' : 'default';
+} catch (_) {
+  sortMode = 'default';
 }
 
 const DEFAULT_SETTINGS_STATE = {
@@ -4812,6 +5220,13 @@ function tagStyle(tag) {
   return `--tag-h:${tagHue(tag)}`;
 }
 
+function compareLabels(left, right) {
+  return String(left ?? '').localeCompare(String(right ?? ''), 'zh-Hans-CN', {
+    numeric: true,
+    sensitivity: 'base',
+  });
+}
+
 function renderTagPill(tag, options = {}) {
   const classes = ['tag-pill'];
   if (options.active) classes.push('active');
@@ -4874,7 +5289,7 @@ function getKnownTags(source = settingsState) {
 function getVisibleGroups() {
   const discovered = uniqueStrings(projects.map(project => project.group).filter(Boolean));
   const ordered = GROUP_ORDER.filter(group => discovered.includes(group));
-  const extras = discovered.filter(group => !GROUP_ORDER.includes(group)).sort((left, right) => left.localeCompare(right));
+  const extras = discovered.filter(group => !GROUP_ORDER.includes(group)).sort(compareLabels);
   return ['All', ...ordered, ...extras];
 }
 
@@ -4883,14 +5298,24 @@ function groupIndex(group) {
   return index === -1 ? GROUP_ORDER.length : index;
 }
 
-function orderedProjects(list) {
+function orderedProjects(list, mode = sortMode) {
   return list.slice().sort((left, right) => {
-    // Pinned items always come first
+    if (mode === 'name') {
+      const nameDelta = compareLabels(left.name, right.name);
+      if (nameDelta !== 0) return nameDelta;
+      const groupDelta = compareLabels(left.group, right.group);
+      if (groupDelta !== 0) return groupDelta;
+      return (Number(left.port) || 0) - (Number(right.port) || 0);
+    }
+
+    // Pinned items always come first in the default grouped view.
     if (left.pinned && !right.pinned) return -1;
     if (!left.pinned && right.pinned) return 1;
     const groupDelta = groupIndex(left.group) - groupIndex(right.group);
     if (groupDelta !== 0) return groupDelta;
-    return left.name.localeCompare(right.name);
+    const nameDelta = compareLabels(left.name, right.name);
+    if (nameDelta !== 0) return nameDelta;
+    return (Number(left.port) || 0) - (Number(right.port) || 0);
   });
 }
 
@@ -4960,6 +5385,11 @@ function syncSearchInput() {
   if (input && input.value !== searchQuery) input.value = searchQuery;
 }
 
+function syncSortSelect() {
+  const select = document.getElementById('sort-select');
+  if (select && select.value !== sortMode) select.value = sortMode;
+}
+
 function syncSettingsInputs() {
   if (!settingsDraft) return;
   const fields = {
@@ -4977,6 +5407,7 @@ function syncSettingsInputs() {
 
 function renderSidebar() {
   syncSearchInput();
+  syncSortSelect();
 
   const statusHost = document.getElementById('status-filters');
   if (statusHost) {
@@ -5065,15 +5496,22 @@ function cardHTML(project) {
   const isAsrPlayable = project.id === 'capswriter-asr' || project.id === 'vosk-asr';
   const isVibeVoiceAsr = project.id === 'vibevoice-asr-m3';
   const allTags = Array.isArray(project.tags) ? project.tags : [];
-  const previewTags = allTags.slice(0, 4);
-  const hiddenTagCount = Math.max(0, allTags.length - previewTags.length);
-  const tagMarkup = previewTags.length
-    ? previewTags.map(tag => renderTagPill(tag, {
+  const visibleTags = isExpanded ? allTags : allTags.slice(0, 4);
+  const hiddenTagCount = isExpanded ? 0 : Math.max(0, allTags.length - visibleTags.length);
+  const tagMarkup = visibleTags.length
+    ? visibleTags.map(tag => renderTagPill(tag, {
         active: hasActiveTag(tag),
         compact: true,
         onclick: `toggleTagFilter('${escapeJsString(tag)}')`,
       })).join('') + (hiddenTagCount ? `<span class="hint-chip subtle">+${hiddenTagCount}</span>` : '')
     : '<span class="hint-chip subtle">未标记</span>';
+
+  const tagActionMarkup = `
+    <div class="card-tag-actions">
+      <span class="section-meta">${allTags.length ? `已绑定 ${allTags.length} 个标签` : '当前还没有标签'}</span>
+      <button class="btn btn-log card-tag-edit-btn" type="button" onclick="openProjectTagEditor('${safeId}')">编辑标签</button>
+    </div>
+  `;
 
   const warningMarkup = project.missing_requirements && project.missing_requirements.length
     ? `<div class="warning-note">&#9888; 需要配置：${escapeHtml(project.missing_requirements.join(', '))}</div>`
@@ -5123,7 +5561,7 @@ function cardHTML(project) {
     : '';
 
   return `
-    <article class="${cardClasses}" id="card-${safeId}">
+    <article class="${cardClasses}" id="card-${safeId}" onclick="handleCardClick(event, '${safeId}')">
       <div class="card-header">
         <div class="status-cluster">
           <div class="dot ${dotClass}"></div>
@@ -5154,6 +5592,7 @@ function cardHTML(project) {
         </div>
         ${warningMarkup}
         <div class="card-tag-row">${tagMarkup}</div>
+        ${tagActionMarkup}
         ${introMarkup}
         ${urlMarkup}
       </div>
@@ -5183,7 +5622,6 @@ function render() {
 }
 
 async function loadProjects() {
-  if (document.hidden) return;
   if (loadProjectsPromise) return loadProjectsPromise;
 
   try {
@@ -5192,6 +5630,7 @@ async function loadProjects() {
       .then(data => {
         projects = Array.isArray(data) ? data : [];
         render();
+        if (projectTagEditor) renderProjectTagEditor();
         return projects;
       })
       .finally(() => {
@@ -5213,6 +5652,7 @@ async function loadSettings() {
       .then(data => {
         settingsState = coerceSettingsState(data);
         render();
+        if (projectTagEditor) renderProjectTagEditor();
         return settingsState;
       })
       .finally(() => {
@@ -5227,6 +5667,16 @@ async function loadSettings() {
 
 function setSearchQuery(value) {
   searchQuery = String(value || '');
+  render();
+}
+
+function setSortMode(mode) {
+  const nextMode = mode === 'name' ? 'name' : 'default';
+  if (sortMode === nextMode) return;
+  sortMode = nextMode;
+  try {
+    localStorage.setItem(SORT_MODE_STORAGE_KEY, sortMode);
+  } catch (_) {}
   render();
 }
 
@@ -5262,6 +5712,15 @@ function clearAllFilters() {
   render();
 }
 
+function shouldIgnoreCardToggle(target) {
+  return !!target?.closest('button, a, input, select, textarea, label');
+}
+
+function handleCardClick(event, id) {
+  if (!compactMode || !id || shouldIgnoreCardToggle(event.target)) return;
+  toggleCardDetails(id);
+}
+
 function toggleCardDetails(id) {
   if (!id) return;
   if (expandedCards.has(id)) expandedCards.delete(id);
@@ -5278,7 +5737,7 @@ function applyCompactMode() {
   button.innerHTML = compactMode ? '&#128374; 标准' : '&#128269; 紧凑';
   button.title = compactMode
     ? '已开启超紧凑模式，点击恢复标准布局'
-    : '开启超紧凑模式（每卡一行核心信息，悬停显示入口）';
+    : '开启超紧凑模式（每卡一行核心信息，点击卡片展开详情）';
 }
 
 function toggleCompactMode() {
@@ -5405,10 +5864,8 @@ function renderSettingsProjectAssignments() {
 
 function addTag(tag) {
   if (!settingsDraft) return;
-  const normalized = normalizeTagLabel(tag);
+  const normalized = addTagToState(settingsDraft, tag);
   if (!normalized) return;
-  const nextTags = uniqueStrings([...(settingsDraft.tags || []), normalized]);
-  settingsDraft.tags = nextTags;
   renderSettingsModal();
 }
 
@@ -5446,17 +5903,178 @@ function removeTag(tag) {
   renderSettingsModal();
 }
 
-function toggleProjectTag(projectId, tag) {
-  if (!settingsDraft) return;
-  const currentTags = settingsDraft.project_tags[projectId] || [];
+function addTagToState(targetState, tag) {
+  if (!targetState) return '';
+  const normalized = normalizeTagLabel(tag);
+  if (!normalized) return '';
+  targetState.tags = uniqueStrings([...(targetState.tags || []), normalized]);
+  return normalized;
+}
+
+function toggleProjectTagAssignment(targetState, projectId, tag) {
+  if (!targetState || !projectId) return;
+  if (!targetState.project_tags || typeof targetState.project_tags !== 'object') {
+    targetState.project_tags = {};
+  }
+
+  const currentTags = targetState.project_tags[projectId] || [];
   if (isTagIncluded(currentTags, tag)) {
     const remaining = currentTags.filter(item => normalizeTagLabel(item).toLocaleLowerCase() !== normalizeTagLabel(tag).toLocaleLowerCase());
-    if (remaining.length) settingsDraft.project_tags[projectId] = remaining;
-    else delete settingsDraft.project_tags[projectId];
-  } else {
-    settingsDraft.project_tags[projectId] = uniqueStrings([...currentTags, tag]);
+    if (remaining.length) targetState.project_tags[projectId] = remaining;
+    else delete targetState.project_tags[projectId];
+    return;
   }
+
+  targetState.project_tags[projectId] = uniqueStrings([...currentTags, tag]);
+}
+
+function ensureProjectTagAssignment(targetState, projectId, tag) {
+  if (!targetState || !projectId) return;
+  if (!targetState.project_tags || typeof targetState.project_tags !== 'object') {
+    targetState.project_tags = {};
+  }
+  const currentTags = targetState.project_tags[projectId] || [];
+  if (isTagIncluded(currentTags, tag)) return;
+  targetState.project_tags[projectId] = uniqueStrings([...currentTags, tag]);
+}
+
+function toggleProjectTag(projectId, tag) {
+  if (!settingsDraft) return;
+  toggleProjectTagAssignment(settingsDraft, projectId, tag);
   renderSettingsModal();
+}
+
+function getProjectById(projectId) {
+  return projects.find(project => project.id === projectId) || null;
+}
+
+async function openProjectTagEditor(projectId) {
+  await Promise.all([loadSettings(), loadProjects()]);
+  const project = getProjectById(projectId);
+  if (!project) return;
+  projectTagEditor = {
+    projectId,
+    draft: cloneSettingsState(settingsState),
+  };
+  renderProjectTagEditor();
+  document.getElementById('project-tag-overlay').classList.add('open');
+  const input = document.getElementById('project-tag-new-input');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+}
+
+function closeProjectTagEditor(event) {
+  const overlay = document.getElementById('project-tag-overlay');
+  if (!overlay) return;
+  if (event && event.target !== overlay) return;
+  overlay.classList.remove('open');
+  projectTagEditor = null;
+}
+
+function renderProjectTagEditor() {
+  if (!projectTagEditor) return;
+  const project = getProjectById(projectTagEditor.projectId);
+  if (!project) {
+    closeProjectTagEditor();
+    return;
+  }
+
+  const title = document.getElementById('project-tag-title');
+  const subtitle = document.getElementById('project-tag-subtitle');
+  const count = document.getElementById('project-tag-count');
+  const host = document.getElementById('project-tag-editor-tags');
+  if (!title || !subtitle || !count || !host) return;
+
+  const mappedTags = projectTagEditor.draft.project_tags[project.id] || [];
+  const tags = getKnownTags(projectTagEditor.draft).slice().sort((left, right) => {
+    const selectedDelta = Number(isTagIncluded(mappedTags, right)) - Number(isTagIncluded(mappedTags, left));
+    if (selectedDelta !== 0) return selectedDelta;
+    return compareLabels(left, right);
+  });
+
+  title.textContent = project.name;
+  subtitle.textContent = `${project.group || 'Other'} · :${project.port}`;
+  count.textContent = `${mappedTags.length} 个标签`;
+  host.innerHTML = tags.length
+    ? tags.map(tag => renderTagPill(tag, {
+        compact: true,
+        active: isTagIncluded(mappedTags, tag),
+        onclick: `toggleProjectTagEditorTag('${escapeJsString(tag)}')`,
+      })).join('')
+    : '<span class="empty-mini">当前还没有可选标签，请先新增一个。</span>';
+}
+
+function toggleProjectTagEditorTag(tag) {
+  if (!projectTagEditor) return;
+  toggleProjectTagAssignment(projectTagEditor.draft, projectTagEditor.projectId, tag);
+  renderProjectTagEditor();
+}
+
+function addProjectTagFromInput() {
+  if (!projectTagEditor) return;
+  const input = document.getElementById('project-tag-new-input');
+  if (!input) return;
+  const normalized = addTagToState(projectTagEditor.draft, input.value);
+  if (!normalized) return;
+  ensureProjectTagAssignment(projectTagEditor.draft, projectTagEditor.projectId, normalized);
+  input.value = '';
+  input.focus();
+  renderProjectTagEditor();
+}
+
+function handleProjectTagNewKeydown(event) {
+  if (event.key !== 'Enter') return;
+  event.preventDefault();
+  addProjectTagFromInput();
+}
+
+async function saveProjectTagEditor() {
+  if (!projectTagEditor) return;
+  const button = document.getElementById('save-project-tag-btn');
+  if (!button) return;
+
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = '保存中...';
+
+  const payload = {
+    secrets: projectTagEditor.draft.secrets,
+    tags: uniqueStrings(projectTagEditor.draft.tags || []),
+    project_tags: compactProjectTags(projectTagEditor.draft.project_tags),
+  };
+
+  try {
+    const response = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!data.ok) {
+      alert('保存失败：' + (data.msg || '未知错误'));
+      button.textContent = original;
+      button.disabled = false;
+      return;
+    }
+
+    settingsState = coerceSettingsState(data.settings || payload);
+    if (settingsDraft) settingsDraft = cloneSettingsState(settingsState);
+    button.textContent = '已保存';
+    await loadProjects();
+    render();
+    setTimeout(() => {
+      button.textContent = original;
+      button.disabled = false;
+      closeProjectTagEditor();
+      if (settingsDraft) renderSettingsModal();
+    }, 400);
+  } catch (error) {
+    alert('保存失败：' + String(error));
+    button.textContent = original;
+    button.disabled = false;
+  }
 }
 
 async function saveSettings() {
@@ -5812,6 +6430,7 @@ document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;
   closeModal();
   closeSettings();
+  closeProjectTagEditor();
 });
 </script>
 </body>
