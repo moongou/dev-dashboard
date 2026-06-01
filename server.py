@@ -53,6 +53,38 @@ VIBEVOICE_ASR_HOTKEY_FILE = SETTINGS_DIR / "vibevoice_asr_hotkey.json"
 
 # Running processes {id: Popen}
 _procs: dict = {}
+class ExternalProc:
+  """Lightweight wrapper for a process not started by a live Popen
+
+  Used when the start command detaches/execs into a different PID. The
+  wrapper provides a minimal Popen-like interface used by stop logic.
+  """
+  def __init__(self, pid: int):
+    self.pid = pid
+
+  def poll(self):
+    try:
+      os.kill(self.pid, 0)
+      return None
+    except OSError:
+      return 1
+
+  def wait(self, timeout: float | None = None):
+    deadline = time.monotonic() + (timeout or 0)
+    while True:
+      try:
+        os.kill(self.pid, 0)
+      except OSError:
+        return 0
+      if timeout is not None and time.monotonic() > deadline:
+        raise TimeoutError()
+      time.sleep(0.1)
+
+  def kill(self):
+    try:
+      os.kill(self.pid, signal.SIGKILL)
+    except Exception:
+      pass
 _projects_cache: dict[str, object] = {"data": None, "expires_at": 0.0}
 _projects_cache_lock = asyncio.Lock()
 _projects_executor = ThreadPoolExecutor(max_workers=8)
@@ -2078,6 +2110,25 @@ async def start_project(pid: str):
     _procs[pid] = proc
     time.sleep(0.5)
     if proc.poll() is not None:
+      # The start command exited quickly. It's common for start scripts to
+      # exec/detach into another PID (docker, system wrappers, etc). If the
+      # project advertises a port, wait briefly for the port to become ready
+      # and, if found, register the external PID so stop logic can manage it.
+      if port is not None:
+        deadline = time.monotonic() + 10.0
+        while time.monotonic() < deadline:
+          if http_ready(port):
+            pids = port_pids(port)
+            if pids:
+              ext = ExternalProc(pids[0])
+              _procs[pid] = ext
+              invalidate_projects_cache()
+              return {"ok": True, "pid": pids[0]}
+            invalidate_projects_cache()
+            return {"ok": True, "pid": proc.pid}
+          time.sleep(0.25)
+
+      # No port or port never appeared — treat as failure and surface logs.
       _procs.pop(pid, None)
       lines = log_path.read_text(errors="ignore").splitlines()[-20:]
       msg = "\n".join(lines).strip() or f"Process exited immediately with code {proc.returncode}"
