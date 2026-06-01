@@ -124,7 +124,7 @@ PROJECTS = [
     "port": 5420,
     "group": "AI",
     "dir": str(HOME / "VS-CODE-PROJECT/Customs_Parameters/frontend"),
-    "cmd": ["/usr/local/bin/npm", "run", "dev", "--", "--port", "5420"],
+    "cmd": ["npm", "run", "dev", "--", "--port", "5420"],
     "url_path": "/",
     "has_git": False,
     "tags": ["海关", "参数库", "前端", "溯源"],
@@ -156,7 +156,7 @@ PROJECTS = [
     "port": 5174,
     "group": "AI",
     "dir": str(HOME / "VS-CODE-PROJECT/DayDayUp/frontend"),
-    "cmd": ["/usr/local/bin/npm", "run", "dev", "--", "--port", "5174"],
+    "cmd": ["npm", "run", "dev", "--", "--port", "5174"],
     "url_path": "/",
     "has_git": False,
     "tags": ["智能办公", "前端", "网页界面"],
@@ -1414,8 +1414,8 @@ PROJECTS = [
         "group": "工具链",
         "dir": str(HOME / "VS-CODE-PROJECT/Codegraph"),
         "cmd": [
-            "/usr/local/bin/node",
-            str(HOME / "VS-CODE-PROJECT/Codegraph/devserver.js"),
+          "node",
+          str(HOME / "VS-CODE-PROJECT/Codegraph/devserver.js"),
         ],
         "env": {"PORT": "7474"},
         "url_path": "/",
@@ -1425,6 +1425,22 @@ PROJECTS = [
             "-c",
             "cd " + str(HOME / "VS-CODE-PROJECT/Codegraph") + " && git -c http.proxy='' -c https.proxy='' pull && npm install && npm run build",
         ],
+    },
+    # ── GatherInfo ───────────────────────────────────────────────────────────
+    {
+        "id": "gatherinfo",
+        "name": "GatherInfo",
+        "desc": "全球跨境贸易情报平台（FastAPI + Vite）",
+        "intro": (
+          "汇聚海关与贸易数据，提供风险评分、情报查询与仿真工具。"
+          "面板启动时会在后端 8108 与前端 5178 上运行。"
+        ),
+        "port": 5178,
+        "group": "AI",
+        "dir": str(HOME / "VS-CODE-PROJECT/GatherInfo"),
+        "cmd": ["bash", "-lc", "./scripts/dev.sh"],
+        "url_path": "/",
+        "has_git": False,
     },
 ]
 
